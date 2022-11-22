@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 22 23:07:14 2021
-"""
 import faultdiagnosistoolbox as fdt
 import sympy as sym
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import networkx as nx
-
-# from networkx.drawing.nx_agraph import graphviz_layout
 from collections import Counter
 
 modelDef={}
@@ -52,35 +46,26 @@ four_tank = fdt.DiagnosisModel(modelDef, name='Four Tank System ')
 # model informations
 four_tank.Lint()
 
-#plt.figure(figsize=(20, 60))
 
 # Plot model
-
-#plt.subplot(3, 1, 1)
 four_tank.PlotModel()
 _ = plt.title('Figure 1 : FOUR TANK SYSTEM')
 plt.show()
-# STRUCTURAL ANALYSIS
 
+# STRUCTURAL ANALYSIS
 equations = four_tank.e
 unknown_variables = four_tank.x
 known_variables = four_tank.z
 
 # Incidence matrix
-
 incidence_matrix_u_v = four_tank.X
 incidence_matrix_k_v = four_tank.Z
 
 # numpy matrix to pandas datzframe matrix
-df_u_v = pd.DataFrame(incidence_matrix_u_v, index=equations,
-                      columns=unknown_variables)
-df_k_v = pd.DataFrame(incidence_matrix_k_v, index=equations,
-                      columns=known_variables)
-
-# print(df_u_v)
+df_u_v = pd.DataFrame(incidence_matrix_u_v, index=equations, columns=unknown_variables)
+df_k_v = pd.DataFrame(incidence_matrix_k_v, index=equations, columns=known_variables)
 
 # Tripartite graph
-
 B = nx.Graph()
 B.add_nodes_from(df_k_v.columns, bipartite=0)
 B.add_nodes_from(df_u_v.index, bipartite=1)
@@ -88,7 +73,6 @@ B.add_nodes_from(df_u_v.columns, bipartite=2)
 
 s = df_u_v.stack()
 B.add_edges_from(s[s >= 1].index)
-
 ss = df_k_v.stack()
 B.add_edges_from(ss[ss >= 1].index)
 
@@ -98,7 +82,7 @@ nodes = B.nodes()
 nodes_0 = set([n for n in nodes if B.nodes[n]['bipartite'] == 0])
 nodes_1 = set([n for n in nodes if B.nodes[n]['bipartite'] == 1])
 nodes_2 = set([n for n in nodes if B.nodes[n]['bipartite'] == 2])
-print(nodes_0)
+
 # set the location of the nodes for each set
 pos = dict()
 pos.update((n, (1, i)) for i, n in enumerate(nodes_0))
@@ -106,7 +90,6 @@ pos.update((n, (2, i)) for i, n in enumerate(nodes_1))
 pos.update((n, (3, i)) for i, n in enumerate(nodes_2))
 
 # ploting result
-#plt.subplot(3, 1, 2)
 nx.draw(B, pos=pos,
         node_color='lightgreen',
         edge_color='lightblue',
@@ -204,14 +187,6 @@ print("all cycles : ")
 for count , c in enumerate(cycles):
     print(f"C{count + 1}: ", c)
 print(len(cycles))
-print("all calculation paths : ")
-print(len(cp))
-print(cp[0])
-print(cp[1])
-print(cp[2])
-print(cp[3])
-print(cp[4])
-print(cp[5])
 
 #degree of redundancy
 def red_degree(paths):
@@ -227,7 +202,6 @@ print(rd)
 print('cycles valid : ')
 print(cycles)
 print('Cycles sensivities :')
-
 
 # sorting equation from each cycle
 eq_sets = []
@@ -333,13 +307,9 @@ plt.show()
 
 # IsolabilityAnalysis
 #plt.subplot(5, 1, 5)
-four_tank.IsolabilityAnalysisFSM(FSM(eq_sets), plot=True)
+four_tank.IsolabilityAnalysisFSM(four_tank.FSM(eq_sets), permute=False, plot=True)
 _ = plt.title(' Figure 4 : Isolability matrix ')
 plt.show()
 
-four_tank.IsolabilityAnalysisArrs(FSM(eq_sets), plot=True)
-_ = plt.title(' Figure 5 : Isolability matrix 2 ')
-plt.show()
-#plt.show() IsolabilityAnalysisArrs
 
 
